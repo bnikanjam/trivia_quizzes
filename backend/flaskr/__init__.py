@@ -2,6 +2,7 @@ import os
 from flask import Flask, request, abort, jsonify
 from flask_sqlalchemy import SQLAlchemy
 from flask_cors import CORS
+from flask_restful import Api, Resource
 import random
 
 from models import setup_db, Question, Category
@@ -20,7 +21,7 @@ def create_app(test_config=None):
     def after_request(response):
         response.headers.add('Access-Control-Allow-Headers', 'Content-Type,Authorization,true')
         response.headers.add('Access-Control-Allow-Methods', 'GET,PUT,POST,DELETE,OPTIONS')
-        response.headers.add('Access-Control-Allow-Origin', '*')
+    #     # response.headers.add('Access-Control-Allow-Origin', '*')
         return response
 
     if not test_config:
@@ -28,25 +29,59 @@ def create_app(test_config=None):
     else:
         setup_db(app, os.getenv('TEST_DB_URI'))
 
+    api = Api(app)
 
-    '''
-  @TODO: 
-  Create an endpoint to handle GET requests 
-  for all available categories.
-  '''
+    class Ping(Resource):
+        def get(self):
+            return {
+                'data': 'Pong'
+            }
 
-    '''
-  @TODO: 
-  Create an endpoint to handle GET requests for questions, 
-  including pagination (every 10 questions). 
-  This endpoint should return a list of questions, 
-  number of total questions, current category, categories. 
+    def pos(self, name):
+        return {
+            'Hello': name
+        }
 
-  TEST: At this point, when you start the application
-  you should see questions and categories generated,
-  ten questions per page and pagination at the bottom of the screen for three pages.
-  Clicking on the page numbers should update the questions. 
-  '''
+    api.add_resource(Ping, '/ping')
+
+    class Categories(Resource):
+        def get(self):
+
+            success_response_object = {
+                'status': 'success',
+                'data': list()
+            }
+            fail_response_object = {
+                'status': 'fail',
+                'message': 'The server can not find categories or no category exist yet.'
+            }
+
+            try:
+                categories = Category.query.all()
+                if categories is None:
+                    return fail_response_object, 400
+                else:
+                    data = [category.format() for category in categories]
+                    success_response_object['data'] = data
+                    return success_response_object, 200
+            except ValueError:
+                return fail_response_object, 404
+
+
+    api.add_resource(Categories, '/categories')
+
+
+
+  # @TODO:
+  # Create an endpoint to handle GET requests for questions,
+  # including pagination (every 10 questions).
+  # This endpoint should return a list of questions,
+  # number of total questions, current category, categories.
+  #
+  # TEST: At this point, when you start the application
+  # you should see questions and categories generated,
+  # ten questions per page and pagination at the bottom of the screen for three pages.
+  # Clicking on the page numbers should update the questions.
 
     '''
   @TODO: 
