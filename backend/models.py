@@ -4,9 +4,7 @@ from flask_sqlalchemy import SQLAlchemy
 import json
 from flask import Flask
 
-# database_name = "trivia"
-# database_path = "postgres://{}/{}".format('localhost:5432', database_name)
-dev_db = os.getenv('HEROKU_DB_URI')
+# dev_db = os.getenv('HEROKU_DB_URI')
 
 db = SQLAlchemy()
 
@@ -18,12 +16,6 @@ def setup_db(app, db_url):
     db.app = app
     db.init_app(app)
     db.create_all()
-
-
-'''
-Question
-
-'''
 
 
 class Question(db.Model):
@@ -60,12 +52,6 @@ class Question(db.Model):
             'category': self.category,
             'difficulty': self.difficulty
         }
-
-
-'''
-Category
-
-'''
 
 
 class Category(db.Model):

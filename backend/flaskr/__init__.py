@@ -9,17 +9,22 @@ from models import setup_db, Question, Category
 QUESTIONS_PER_PAGE = 10
 
 
+# Application factory
 def create_app(test_config=None):
-    # create and configure the app
     app = Flask(__name__)
     CORS(app)
 
+    # CORS Headers
+    @app.after_request
+    def after_request(response):
+        response.headers.add('Access-Control-Allow-Headers', 'Content-Type,Authorization,true')
+        response.headers.add('Access-Control-Allow-Methods', 'GET,PUT,POST,DELETE,OPTIONS')
+        return response
+
     if not test_config:
-        dev_db_url = os.getenv('DEV_DB_URI')
-        setup_db(app, dev_db_url)
+        setup_db(app, os.getenv('DEV_DB_URI'))
     else:
-        test_db_url = os.getenv('TEST_DB_URI')
-        setup_db(app, test_db_url)
+        setup_db(app, os.getenv('TEST_DB_URI'))
 
     '''
   @TODO: Set up CORS. Allow '*' for origins. Delete the sample route after completing the TODOs
