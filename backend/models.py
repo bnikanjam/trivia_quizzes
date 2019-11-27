@@ -38,11 +38,14 @@ class Question(db.Model):
         db.session.commit()
 
     def update(self):
-        db.session.commit()
+        db.session.commit(self)
 
     def delete(self):
         db.session.delete(self)
         db.session.commit()
+
+    def rollback(self):
+        db.session.rollback(self)
 
     def format(self):
         return {

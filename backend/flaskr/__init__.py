@@ -2,10 +2,14 @@ import os
 from flask import Flask, request, abort, jsonify
 from flask_sqlalchemy import SQLAlchemy
 from flask_cors import CORS
-from flask_restful import Api, Resource
+from flask_restful import Api, Resource, reqparse
 import random
 
+from sqlalchemy import exc
+
 from models import setup_db, Question, Category
+
+from utilities import print_blue, print_green, print_red, print_yellow
 
 QUESTIONS_PER_PAGE = 10
 
@@ -41,12 +45,15 @@ def create_app(test_config=None):
 
     api = Api(app)
 
+    parser = reqparse.RequestParser()
+    parser.add_argument('')
+
     class Categories(Resource):
         def get(self):
 
             success_response_object = {
                 'status': 'success',
-                'data': list()
+                'categories': list()
             }
             fail_response_object = {
                 'status': 'fail',
@@ -66,14 +73,14 @@ def create_app(test_config=None):
 
     class Questions(Resource):
         def get(self):
-            success_response_object = {
+            success_response = {
                 'status': 'success',
                 'questions': list(),
                 'total_questions': int(),
                 'categories': list(),
                 'current_category': str()
             }
-            fail_response_object = {
+            fail_response = {
                 'status': 'fail',
                 'message': 'The server can not find questions or no question exists yet.'
             }
@@ -83,20 +90,58 @@ def create_app(test_config=None):
                 categories = Category.query.all()
 
                 if not questions or not categories:
-                    return fail_response_object, 400
+                    return fail_response, 400
                 else:
-                    success_response_object['questions'] = paginate(request, questions)
-                    success_response_object['total_questions'] = len(questions)
-                    success_response_object['categories'] = [category.format() for category in categories]
-                    success_response_object['current_category'] = None
-                    return success_response_object, 200
+                    success_response['questions'] = paginate(request, questions)
+                    success_response['total_questions'] = len(questions)
+                    success_response['categories'] = [category.format() for category in categories]
+                    success_response['current_category'] = None
+                    return success_response, 200
             except ValueError:
-                return fail_response_object, 404
+                return fail_response, 404
+
+        def post(self):
+
+            success_response = {
+                'status': 'success',
+                'question': str(),
+                'answer': str(),
+                'category': int(),
+                'difficulty': int()
+            }
+            fail_response = {
+                'status': 'fail',
+                'message': 'Error adding new question to database.'
+            }
+
+            post_data = request.get_json()
+            if post_data is None:
+                fail_response['message'] = 'None or invalid question format sent to server.'
+                return fail_response, 400
+            else:
+                try:
+                    question = post_data.get('question'),
+                    answer = post_data.get('answer'),
+                    category = post_data.get('category'),
+                    difficulty = post_data.get('difficulty')
+                    new_question = Question(
+                        question=question,
+                        answer=answer,
+                        category=category,
+                        difficulty=difficulty
+                    ).insert()
+                    success_response['question'] = question[0]
+                    success_response['answer'] = answer[0]
+                    success_response['category'] = category[0]
+                    success_response['difficulty'] = difficulty[0]
+                    return success_response, 201
+                except exc.IntegrityError:
+                    new_question.rollback()
+                    return fail_response, 400
 
     api.add_resource(Categories, '/categories')
     api.add_resource(Questions, '/', '/questions')
 
-    # also must return number of total questions, current category, categories.
 
     # TEST: At this point, when you start the application
     # you should see questions and categories generated,
