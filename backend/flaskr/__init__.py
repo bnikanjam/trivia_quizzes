@@ -10,18 +10,28 @@ from models import setup_db, Question, Category
 QUESTIONS_PER_PAGE = 10
 
 
+def paginate(request, selection):
+    page = request.args.get('page', 1, int)
+    start = (page - 1) * QUESTIONS_PER_PAGE
+    end = start + QUESTIONS_PER_PAGE
+    # questions = [question.format() for question in selection]
+    # return questions[start:end]
+    return [question.format() for question in selection[start:end]]
+
+
 # Application factory
 def create_app(test_config=None):
     app = Flask(__name__)
 
     # Initializes Cross Origin Resource sharing for the app
     CORS(app)
+
     # Set Access-Control-Allow
     @app.after_request
     def after_request(response):
         response.headers.add('Access-Control-Allow-Headers', 'Content-Type,Authorization,true')
         response.headers.add('Access-Control-Allow-Methods', 'GET,PUT,POST,DELETE,OPTIONS')
-    #     # response.headers.add('Access-Control-Allow-Origin', '*')
+        #     # response.headers.add('Access-Control-Allow-Origin', '*')
         return response
 
     if not test_config:
@@ -30,19 +40,6 @@ def create_app(test_config=None):
         setup_db(app, os.getenv('TEST_DB_URI'))
 
     api = Api(app)
-
-    class Ping(Resource):
-        def get(self):
-            return {
-                'data': 'Pong'
-            }
-
-    def pos(self, name):
-        return {
-            'Hello': name
-        }
-
-    api.add_resource(Ping, '/ping')
 
     class Categories(Resource):
         def get(self):
@@ -53,7 +50,7 @@ def create_app(test_config=None):
             }
             fail_response_object = {
                 'status': 'fail',
-                'message': 'The server can not find categories or no category exist yet.'
+                'message': 'The server can not find categories or no category exists yet.'
             }
 
             try:
@@ -67,21 +64,44 @@ def create_app(test_config=None):
             except ValueError:
                 return fail_response_object, 404
 
+    class Questions(Resource):
+        def get(self):
+            success_response_object = {
+                'status': 'success',
+                'questions': list(),
+                'total_questions': int(),
+                'categories': list(),
+                'current_category': str()
+            }
+            fail_response_object = {
+                'status': 'fail',
+                'message': 'The server can not find questions or no question exists yet.'
+            }
+
+            try:
+                questions = Question.query.all()
+                categories = Category.query.all()
+
+                if not questions or not categories:
+                    return fail_response_object, 400
+                else:
+                    success_response_object['questions'] = paginate(request, questions)
+                    success_response_object['total_questions'] = len(questions)
+                    success_response_object['categories'] = [category.format() for category in categories]
+                    success_response_object['current_category'] = None
+                    return success_response_object, 200
+            except ValueError:
+                return fail_response_object, 404
 
     api.add_resource(Categories, '/categories')
+    api.add_resource(Questions, '/', '/questions')
 
+    # also must return number of total questions, current category, categories.
 
-
-  # @TODO:
-  # Create an endpoint to handle GET requests for questions,
-  # including pagination (every 10 questions).
-  # This endpoint should return a list of questions,
-  # number of total questions, current category, categories.
-  #
-  # TEST: At this point, when you start the application
-  # you should see questions and categories generated,
-  # ten questions per page and pagination at the bottom of the screen for three pages.
-  # Clicking on the page numbers should update the questions.
+    # TEST: At this point, when you start the application
+    # you should see questions and categories generated,
+    # ten questions per page and pagination at the bottom of the screen for three pages.
+    # Clicking on the page numbers should update the questions.
 
     '''
   @TODO: 
