@@ -49,12 +49,14 @@ def create_app(test_config=None):
     parser.add_argument('')
 
     class Categories(Resource):
+        """"""
+        payload_key = 'categories'
+
         def get(self):
             """HTTP GET """
-            payload_key = 'categories'
             success_response = {
                 'status': 'success',
-                payload_key: list()
+                self.payload_key: list()
             }
             fail_response = {
                 'status': 'fail',
@@ -65,18 +67,20 @@ def create_app(test_config=None):
                 if categories is None:
                     return fail_response, 400
                 else:
-                    success_response[payload_key] = [category.format() for category in categories]
+                    success_response[self.payload_key] = [category.format() for category in categories]
                     return success_response, 200
             except ValueError:
                 return fail_response, 404
 
     class Questions(Resource):
+        """"""
+        payload_key = 'questions'
+
         def get(self):
             """HTTP GET Request Method"""
-            payload_key = 'questions'
             success_response = {
                 'status': 'success',
-                payload_key: [],
+                self.payload_key: [],
                 'total_questions': int(),
                 'categories': {},
                 'current_category': None
@@ -92,7 +96,7 @@ def create_app(test_config=None):
                 if not questions or not categories:
                     return fail_response, 400
                 else:
-                    success_response[payload_key] = paginate(request, questions)
+                    success_response[self.payload_key] = paginate(request, questions)
                     success_response['total_questions'] = len(questions)
                     success_response['categories'] = {category.id: category.type for category in categories}
                     success_response['current_category'] = None
@@ -101,10 +105,10 @@ def create_app(test_config=None):
                 return fail_response, 404
 
         def post(self):
-
+            """HTTP POST Request Method"""
             success_response = {
                 'status': 'success',
-                'question': str(),
+                self.pa: str(),
                 'answer': str(),
                 'category': int(),
                 'difficulty': int()
@@ -130,7 +134,7 @@ def create_app(test_config=None):
                         category=category,
                         difficulty=difficulty
                     ).insert()
-                    success_response['question'] = question[0]
+                    success_response[self.payload_key] = question[0]
                     success_response['answer'] = answer[0]
                     success_response['category'] = category[0]
                     success_response['difficulty'] = difficulty[0]
@@ -142,9 +146,6 @@ def create_app(test_config=None):
     api.add_resource(Categories, '/categories')
     api.add_resource(Questions, '/', '/questions')
 
-
-    # TEST: At this point, when you start the application
-    # you should see questions and categories generated,
     # ten questions per page and pagination at the bottom of the screen for three pages.
     # Clicking on the page numbers should update the questions.
 
