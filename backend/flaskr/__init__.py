@@ -35,7 +35,7 @@ def create_app(test_config=None):
     def after_request(response):
         response.headers.add('Access-Control-Allow-Headers', 'Content-Type,Authorization,true')
         response.headers.add('Access-Control-Allow-Methods', 'GET,PUT,POST,DELETE,OPTIONS')
-        #     # response.headers.add('Access-Control-Allow-Origin', '*')
+        # response.headers.add('Access-Control-Allow-Origin', '*')
         return response
 
     if not test_config:
@@ -50,41 +50,41 @@ def create_app(test_config=None):
 
     class Categories(Resource):
         def get(self):
-
-            success_response_object = {
+            """HTTP GET """
+            payload_key = 'categories'
+            success_response = {
                 'status': 'success',
-                'categories': list()
+                payload_key: list()
             }
-            fail_response_object = {
+            fail_response = {
                 'status': 'fail',
                 'message': 'The server can not find categories or no category exists yet.'
             }
-
             try:
                 categories = Category.query.all()
                 if categories is None:
-                    return fail_response_object, 400
+                    return fail_response, 400
                 else:
-                    data = [category.format() for category in categories]
-                    success_response_object['data'] = data
-                    return success_response_object, 200
+                    success_response[payload_key] = [category.format() for category in categories]
+                    return success_response, 200
             except ValueError:
-                return fail_response_object, 404
+                return fail_response, 404
 
     class Questions(Resource):
         def get(self):
+            """HTTP GET Request Method"""
+            payload_key = 'questions'
             success_response = {
                 'status': 'success',
-                'questions': list(),
+                payload_key: [],
                 'total_questions': int(),
-                'categories': list(),
-                'current_category': str()
+                'categories': {},
+                'current_category': None
             }
             fail_response = {
                 'status': 'fail',
                 'message': 'The server can not find questions or no question exists yet.'
             }
-
             try:
                 questions = Question.query.all()
                 categories = Category.query.all()
@@ -92,9 +92,9 @@ def create_app(test_config=None):
                 if not questions or not categories:
                     return fail_response, 400
                 else:
-                    success_response['questions'] = paginate(request, questions)
+                    success_response[payload_key] = paginate(request, questions)
                     success_response['total_questions'] = len(questions)
-                    success_response['categories'] = [category.format() for category in categories]
+                    success_response['categories'] = {category.id: category.type for category in categories}
                     success_response['current_category'] = None
                     return success_response, 200
             except ValueError:
