@@ -143,8 +143,34 @@ def create_app(test_config=None):
                     new_question.rollback()
                     return fail_response, 400
 
+        def delete(self, questions_id):
+            """HTTP DELETE Request Method -> CRUD DELETE Action, to delete the specified question"""
+            success_response = {
+                'status': 'success',
+                'message': 'Target question successfully deleted.'
+            }
+            fail_response = {
+                'status': 'fail',
+                'message': 'Error deleting target question.'
+            }
+            try:
+                target_question = Question.query.filter(Question.id == questions_id).one_or_none()
+                if target_question is None:
+                    fail_response['message'] = 'Target question does not exist or already deleted.'
+                    return fail_response, 404
+                target_question.delete()
+                return success_response, 204
+            except exc.IntegrityError:
+                target_question.rollback()
+                return fail_response, 444
+
+
+
+
+
+
     api.add_resource(Categories, '/categories')
-    api.add_resource(Questions, '/', '/questions')
+    api.add_resource(Questions, '/', '/questions', '/questions/<int:questions_id>')
 
     # ten questions per page and pagination at the bottom of the screen for three pages.
     # Clicking on the page numbers should update the questions.

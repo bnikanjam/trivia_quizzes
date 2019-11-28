@@ -1,10 +1,13 @@
 import os
 import unittest
+import random
 import json
 from flask_sqlalchemy import SQLAlchemy
 
 from flaskr import create_app
 from models import setup_db, Question, Category
+
+from utilities import *
 
 
 class TriviaTestCase(unittest.TestCase):
@@ -24,17 +27,40 @@ class TriviaTestCase(unittest.TestCase):
             self.db.init_app(self.app)
             # create all tables
             self.db.create_all()
-    
+
+        # Create a test question
+        self.test_question = str(os.urandom(32))
+        self.test_answer = str(os.urandom(32))
+        self.test_category = random.randint(1, 7)
+        self.test_difficulty = random.randint(1, 5)
+        Question(
+            question=self.test_question,
+            answer=self.test_answer,
+            category=1,
+            difficulty=3
+        ).insert()
+        self.a_question = Question.query.filter(Question.answer == self.test_answer and
+                                                Question.question == self.test_question and
+                                                Question.category == self.test_category and
+                                                Question.difficulty == self.test_difficulty).one_or_none()
+
     def tearDown(self):
         """Executed after reach test"""
         pass
 
-    """
-    TODO
-    Write at least one test for each test for successful operation and for expected errors.
-    """
-    def test_test(self):
-        self.assertEqual(True, True)
+    def test_delete_a_question(self):
+        self.assertIsNotNone(self.a_question)
+        resp = self.client().delete(f'/questions/{self.a_question.id}')
+        retrieve_same_question = Question.query.filter(Question.question == self.test_question).one_or_none()
+        self.assertIsNone(retrieve_same_question)
+        self.assertEqual(resp.status_code, 204)
+
+    def test_delete_a_question_doesnot_exist(self):
+        retrieve_same_question = Question.query.filter(Question.id == 1000000).one_or_none()
+        self.assertIsNone(retrieve_same_question)
+        resp = self.client().delete(f'/questions/1000000')
+        self.assertEqual(resp.status_code, 404)
+        self.assertEqual(resp.json['status'], 'fail')
 
 
 # Make the tests conveniently executable
