@@ -77,7 +77,7 @@ def create_app(test_config=None):
         payload_key = 'questions'
 
         def get(self):
-            """HTTP GET Request Method"""
+            """HTTP GET Request Method -> CRUD Read"""
             success_response = {
                 'status': 'success',
                 self.payload_key: [],
@@ -94,6 +94,7 @@ def create_app(test_config=None):
                 categories = Category.query.all()
 
                 if not questions or not categories:
+                    fail_response['message'] = 'No questions/categories retrieved from database.'
                     return fail_response, 400
                 else:
                     success_response[self.payload_key] = paginate(request, questions)

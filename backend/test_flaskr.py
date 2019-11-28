@@ -13,6 +13,26 @@ from utilities import *
 class TriviaTestCase(unittest.TestCase):
     """This class represents the trivia test case"""
 
+    def create_data_in_database(self):
+        # Create 10 test categories in db from 'Test Category 0' to 'Test Category 9'.
+        self.categories = [Category(type=f'Test Category {x}').insert() for x in range(10)]
+
+        # Create a test question in db
+        self.test_question = str(os.urandom(32))
+        self.test_answer = str(os.urandom(32))
+        self.test_category = random.choice(self.categories)
+        self.test_difficulty = random.randint(1, 5)
+        Question(
+            question=self.test_question,
+            answer=self.test_answer,
+            category=self.test_category,
+            difficulty=3
+        ).insert()
+        self.a_question = Question.query.filter(Question.answer == self.test_answer and
+                                                Question.question == self.test_question and
+                                                Question.category == self.test_category and
+                                                Question.difficulty == self.test_difficulty).one_or_none()
+
     def setUp(self):
         """Define test variables and initialize app."""
         self.app = create_app(test_config=True)
@@ -28,27 +48,30 @@ class TriviaTestCase(unittest.TestCase):
             # create all tables
             self.db.create_all()
 
-        # Create a test question
-        self.test_question = str(os.urandom(32))
-        self.test_answer = str(os.urandom(32))
-        self.test_category = random.randint(1, 7)
-        self.test_difficulty = random.randint(1, 5)
-        Question(
-            question=self.test_question,
-            answer=self.test_answer,
-            category=1,
-            difficulty=3
-        ).insert()
-        self.a_question = Question.query.filter(Question.answer == self.test_answer and
-                                                Question.question == self.test_question and
-                                                Question.category == self.test_category and
-                                                Question.difficulty == self.test_difficulty).one_or_none()
+        # delete all rows in the tables
+        Category.query.delete()
+        Question.query.delete()
 
     def tearDown(self):
         """Executed after reach test"""
         pass
 
+    def test_get_paginated_questions_list(self, page=1):
+        self.create_data_in_database()
+        resp = self.client().get('/questions?page=1')
+        self.assertEqual(resp.json['status'], 'success')
+        self.assertTrue(len(resp.json['categories']))
+        self.assertTrue(len(resp.json['questions']))
+        self.assertTrue(resp.json['total_questions'])
+        self.assertEqual(resp.json['status'], 'success')
+        self.assertEqual(resp.status_code, 200)
+
+    def test_400_get_paginated_questions_list_with_no_questions_read(self, page=1):
+        resp = self.client().get('/questions')
+        self.assertEqual(resp.status_code, 400)
+
     def test_delete_a_question(self):
+        self.create_data_in_database()
         self.assertIsNotNone(self.a_question)
         resp = self.client().delete(f'/questions/{self.a_question.id}')
         retrieve_same_question = Question.query.filter(Question.question == self.test_question).one_or_none()
