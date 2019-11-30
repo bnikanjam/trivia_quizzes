@@ -35,6 +35,11 @@ class TriviaTestCase(unittest.TestCase):
             Question.difficulty == self.test_difficulty
         ).one_or_none()
 
+        # Create 3 test questions
+        Question('test question 1', 'test answer 1', 6, 3).insert()
+        Question('test question 2', 'test answer 3', 5, 2).insert()
+        Question('test question 3', 'test answer 3', 3, 4).insert()
+
     def setUp(self):
         """Define test variables and initialize app."""
         self.app = create_app(test_config=True)
@@ -128,7 +133,34 @@ class TriviaTestCase(unittest.TestCase):
         self.assertEqual(resp.status_code, 400)
         self.assertEqual(resp.get_json()['status'], 'fail')
 
+    def test_444_add_new_question_with_missing_data_fields(self):
+        headers = {
+            'Content-Type': 'application/json'
+        }
+        new_question = {
+            "question": "Capital of CA?",
+            # "answer": "Sacramento",
+            "category": "5",
+            "difficulty": 3
+        }
+        resp = self.client().post('/questions',
+                                  headers=headers,
+                                  data=json.dumps(new_question))
+        # response code
+        self.assertEqual(resp.status_code, 400)
 
-# Make the tests conveniently executable
+    def test_200_search_questions_returned_results(self):
+        headers = {
+            'Content-Type': 'application/json'
+        }
+        resp = self.client().post('/questions',
+                                  headers=headers,
+                                  data=json.dumps({'searchTerm': 'question 3'}))
+        self.assertEqual(resp.status_code, 200)
+        # self.assertEqual(resp.questions, ['test question 3'])
+        self.assertEqual(resp.total_questions, 1)
+        # self.assertEqual(resp.current_category, None)
+
+
 if __name__ == "__main__":
     unittest.main()

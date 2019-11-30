@@ -122,6 +122,14 @@ def create_app(test_config=None):
             if not post_data:
                 fail_response['message'] = 'None or invalid question format sent to server.'
                 return fail_response, 400
+            elif not all(
+                    [post_data.get('question', None),
+                     post_data.get('answer', None),
+                     post_data.get('category', None),
+                     post_data.get('difficulty', None)]
+            ):
+                fail_response['message'] = 'Required question data fields not sent to server.'
+                return fail_response, 400
             else:
                 try:
                     question = post_data.get('question'),
