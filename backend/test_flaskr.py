@@ -28,10 +28,12 @@ class TriviaTestCase(unittest.TestCase):
             category=self.test_category,
             difficulty=3
         ).insert()
-        self.a_question = Question.query.filter(Question.answer == self.test_answer and
-                                                Question.question == self.test_question and
-                                                Question.category == self.test_category and
-                                                Question.difficulty == self.test_difficulty).one_or_none()
+        self.a_question = Question.query.filter(
+            Question.answer == self.test_answer and
+            Question.question == self.test_question and
+            Question.category == self.test_category and
+            Question.difficulty == self.test_difficulty
+        ).one_or_none()
 
     def setUp(self):
         """Define test variables and initialize app."""
@@ -84,6 +86,47 @@ class TriviaTestCase(unittest.TestCase):
         resp = self.client().delete(f'/questions/1000000')
         self.assertEqual(resp.status_code, 404)
         self.assertEqual(resp.json['status'], 'fail')
+
+    def test_201_add_new_question(self):
+        headers = {
+            'Content-Type': 'application/json'
+        }
+        new_question = {
+            "question": "Capital of CA?",
+            "answer": "Sacramento",
+            "category": "5",
+            "difficulty": 3
+        }
+        resp = self.client().post('/questions',
+                                  headers=headers,
+                                  data=json.dumps(new_question))
+        # response code
+        self.assertEqual(resp.status_code, 201)
+
+        # compare with database
+        read_from_db = Question.query.filter(Question.question == 'Capital of CA?').one_or_none()
+        self.assertIsNotNone(read_from_db)
+        self.assertEqual(read_from_db.answer, 'Sacramento')
+        self.assertEqual(read_from_db.category, '5')
+        self.assertEqual(read_from_db.difficulty, 3)
+
+        # response json payload
+        self.assertEqual(resp.get_json()['status'], 'success')
+        self.assertEqual(resp.get_json()['question'], 'Capital of CA?')
+        self.assertEqual(resp.get_json()['answer'], 'Sacramento')
+        self.assertEqual(resp.get_json()['category'], '5')
+        self.assertEqual(resp.get_json()['difficulty'], 3)
+
+    def test_400_add_new_question_no_json_in_request(self):
+        headers = {
+            'Content-Type': 'application/json'
+        }
+        resp = self.client().post('/questions',
+                                  headers=headers,
+                                  data='DSFGHF')
+        # response code
+        self.assertEqual(resp.status_code, 400)
+        self.assertEqual(resp.get_json()['status'], 'fail')
 
 
 # Make the tests conveniently executable

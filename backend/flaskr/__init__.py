@@ -74,13 +74,12 @@ def create_app(test_config=None):
 
     class Questions(Resource):
         """"""
-        payload_key = 'questions'
 
         def get(self):
             """HTTP GET Request Method -> CRUD Read"""
             success_response = {
                 'status': 'success',
-                self.payload_key: [],
+                'questions': [],
                 'total_questions': int(),
                 'categories': {},
                 'current_category': None
@@ -97,7 +96,7 @@ def create_app(test_config=None):
                     fail_response['message'] = 'No questions/categories retrieved from database.'
                     return fail_response, 400
                 else:
-                    success_response[self.payload_key] = paginate(request, questions)
+                    success_response['questions'] = paginate(request, questions)
                     success_response['total_questions'] = len(questions)
                     success_response['categories'] = {category.id: category.type for category in categories}
                     success_response['current_category'] = None
@@ -119,8 +118,8 @@ def create_app(test_config=None):
                 'message': 'Error adding new question to database.'
             }
 
-            post_data = request.get_json()
-            if post_data is None:
+            post_data = request.get_json(silent=True)
+            if not post_data:
                 fail_response['message'] = 'None or invalid question format sent to server.'
                 return fail_response, 400
             else:
@@ -142,7 +141,7 @@ def create_app(test_config=None):
                     return success_response, 201
                 except exc.IntegrityError:
                     new_question.rollback()
-                    return fail_response, 400
+                    return fail_response, 433
 
         def delete(self, questions_id):
             """HTTP DELETE Request Method -> CRUD DELETE Action, to delete the specified question"""
@@ -164,11 +163,6 @@ def create_app(test_config=None):
             except exc.IntegrityError:
                 target_question.rollback()
                 return fail_response, 444
-
-
-
-
-
 
     api.add_resource(Categories, '/categories')
     api.add_resource(Questions, '/', '/questions', '/questions/<int:questions_id>')
