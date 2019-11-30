@@ -67,7 +67,7 @@ def create_app(test_config=None):
                 if categories is None:
                     return fail_response, 400
                 else:
-                    success_response[self.payload_key] = [category.format() for category in categories]
+                    success_response[self.payload_key] = {category.id: category.type for category in categories}
                     return success_response, 200
             except ValueError:
                 return fail_response, 404
@@ -109,9 +109,9 @@ def create_app(test_config=None):
             """HTTP POST Request Method"""
             success_response = {
                 'status': 'success',
-                self.pa: str(),
-                'answer': str(),
-                'category': int(),
+                'question': '',
+                'answer': '',
+                'category': {},
                 'difficulty': int()
             }
             fail_response = {
@@ -135,10 +135,10 @@ def create_app(test_config=None):
                         category=category,
                         difficulty=difficulty
                     ).insert()
-                    success_response[self.payload_key] = question[0]
+                    success_response['question'] = question[0]
                     success_response['answer'] = answer[0]
                     success_response['category'] = category[0]
-                    success_response['difficulty'] = difficulty[0]
+                    success_response['difficulty'] = difficulty
                     return success_response, 201
                 except exc.IntegrityError:
                     new_question.rollback()
