@@ -152,16 +152,9 @@ class TriviaTestCase(unittest.TestCase):
         self.assertEqual(resp.status_code, 200)
 
     # def test_200_questions_based_on_category(self):
-    #     resp = self.client().get('/categories/1/questions')
-    # #
-    # #     # Response status code
-    #     self.assertEqual(resp.status_code, 200)
-    #
-    #     # Response body/payload
-    #     self.assertEqual(resp.json['status'], 'success')
-    #     self.assertTrue(resp.json['questions'])
-    #     self.assertTrue(resp.json['total_questions'])
-    #     self.assertTrue(resp.json['current_category'])
+    #     q = Question.query.all()
+
+        # resp = self.client().get(f'/categories/{self.category_art.id}/questions')
 
 
 if __name__ == "__main__":

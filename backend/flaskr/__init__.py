@@ -187,50 +187,44 @@ def create_app(test_config=None):
                 target_question.rollback()
                 return fail_response, 444
 
-    api.add_resource(Categories, '/categories')
-    api.add_resource(Questions, '/', '/questions', '/questions/<int:questions_id>')
+    class CategoryQuestions(Resource):
 
-    # ten questions per page and pagination at the bottom of the screen for three pages.
-    # Clicking on the page numbers should update the questions.
+        def get(self, category_id):
+            """Returns json response with list of questions base on a category.
+            HTTP GET -> CRUD READ"""
 
-    '''
-  @TODO: 
-  Create an endpoint to DELETE question using a question ID. 
+            success_response = {
+                'status': 'success',
+                'questions': [],
+                'total_questions': int(),
+                'current_category': None
+            }
+            fail_response = {
+                'status': 'fail',
+                'message': 'Server can not find questions for requested category or the category does not exist.'
+            }
+            try:
+                questions = Question.query.order_by(Question.id).filter(Question.category == category_id).all()
 
-  TEST: When you click the trash icon next to a question, the question will be removed.
-  This removal will persist in the database and when you refresh the page. 
-  '''
+                if not questions:
+                    return fail_response, 400
+                else:
+                    success_response['questions'] = paginate(request, questions)
+                    success_response['total_questions'] = len(questions)
+                    success_response['current_category'] = category_id
+                    return success_response, 200
+            except ValueError:
+                return fail_response, 404
 
-    '''
-  @TODO: 
-  Create an endpoint to POST a new question, 
-  which will require the question and answer text, 
-  category, and difficulty score.
+    api.add_resource(Categories,
+                     '/categories')
+    api.add_resource(CategoryQuestions,
+                     '/categories/<int:category_id>/questions')
+    api.add_resource(Questions,
+                     '/',
+                     '/questions',
+                     '/questions/<int:questions_id>')
 
-  TEST: When you submit a question on the "Add" tab, 
-  the form will clear and the question will appear at the end of the last page
-  of the questions list in the "List" tab.  
-  '''
-
-    '''
-  @TODO: 
-  Create a POST endpoint to get questions based on a search term. 
-  It should return any questions for whom the search term 
-  is a substring of the question. 
-
-  TEST: Search by any phrase. The questions list will update to include 
-  only question that include that string within their question. 
-  Try using the word "title" to start. 
-  '''
-
-    '''
-  @TODO: 
-  Create a GET endpoint to get questions based on category. 
-
-  TEST: In the "List" tab / main screen, clicking on one of the 
-  categories in the left column will cause only questions of that 
-  category to be shown. 
-  '''
 
     '''
   @TODO: 
