@@ -216,27 +216,49 @@ def create_app(test_config=None):
             except ValueError:
                 return fail_response, 404
 
+    class PlayQuiz(Resource):
+
+        def get(self):
+            success_response = {
+                'status': 'success',
+            }
+            fail_response = {
+                'status': 'fail',
+                'message': 'ERROR'
+            }
+
+        def post(self):
+            """Returns response object with questions to play the quiz.
+            This endpoint takes category and previous question parameters and
+            return a random questions within the given category, if provided,
+            and that is not one of the previous questions. """
+            success_response = {
+                'status': 'success',
+            }
+            fail_response = {
+                'status': 'fail',
+                'message': 'ERROR'
+            }
+
+
+
     api.add_resource(Categories,
-                     '/categories')
+                     '/categories'
+                     )
     api.add_resource(CategoryQuestions,
-                     '/categories/<int:category_id>/questions')
+                     '/categories/<int:category_id>/questions'
+                     )
     api.add_resource(Questions,
                      '/',
                      '/questions',
-                     '/questions/<int:questions_id>')
+                     '/questions/<int:questions_id>'
+                     )
+    api.add_resource(PlayQuiz,
+                     '/quizzes',  # POST
+                     '/quizzes/categories'  # GET
+                     )
 
 
-    '''
-  @TODO: 
-  Create a POST endpoint to get questions to play the quiz. 
-  This endpoint should take category and previous question parameters 
-  and return a random questions within the given category, 
-  if provided, and that is not one of the previous questions. 
-
-  TEST: In the "Play" tab, after a user selects "All" or a category,
-  one question at a time is displayed, the user is allowed to answer
-  and shown whether they were correct or not. 
-  '''
 
     '''
   @TODO: 
