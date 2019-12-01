@@ -156,6 +156,14 @@ class TriviaTestCase(unittest.TestCase):
 
         # resp = self.client().get(f'/categories/{self.category_art.id}/questions')
 
+    def test_200_get_questions_to_play_the_quiz(self):
+        """  TEST: In the "Play" tab, after a user selects "All" or a category, one question
+        at a time is displayed, the user is allowed to answer
+        and shown whether they were correct or not."""
+
+    def test_400_get_questions_to_play_the_quiz(self):
+        pass
+
 
 if __name__ == "__main__":
     unittest.main()
