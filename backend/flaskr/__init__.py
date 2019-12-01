@@ -2,7 +2,7 @@ import os
 from flask import Flask, request, abort, jsonify
 from flask_sqlalchemy import SQLAlchemy
 from flask_cors import CORS
-from flask_restful import Api, Resource, reqparse
+from flask_restful import Api, Resource
 import random
 
 from sqlalchemy import exc, desc
@@ -44,9 +44,6 @@ def create_app(test_config=None):
         setup_db(app, os.getenv('TEST_DB_URI'))
 
     api = Api(app)
-
-    parser = reqparse.RequestParser()
-    parser.add_argument('')
 
     class Categories(Resource):
         """"""
@@ -217,15 +214,7 @@ def create_app(test_config=None):
                 return fail_response, 404
 
     class PlayQuiz(Resource):
-
-        def get(self):
-            success_response = {
-                'status': 'success',
-            }
-            fail_response = {
-                'status': 'fail',
-                'message': 'ERROR'
-            }
+        """"""
 
         def post(self):
             """Returns response object with questions to play the quiz.
@@ -234,31 +223,53 @@ def create_app(test_config=None):
             and that is not one of the previous questions. """
             success_response = {
                 'status': 'success',
+                # 'showAnswer': False,
+                'previousQuestions': [],
+                # 'guess': '',
+                'forceEnd': False
             }
             fail_response = {
                 'status': 'fail',
                 'message': 'ERROR'
             }
 
+            # # try:
+            post_data = request.get_json(silent=True)
+            print_blue(post_data)
+            previous_questions = post_data.get('previous_questions')
+            quiz_category = post_data.get('quiz_category')
 
+            play_all_categories = True if not quiz_category['id'] else False
+            if play_all_categories:
+                questions_not_played_yet = Question.query.filter(~Question.id.in_(previous_questions)).all()
+                new_question = random.choice(questions_not_played_yet)
+                print_yellow(new_question)
+                previous_questions.append(new_question.id)
+            else:
+                # TODO Category
+                pass
 
-    api.add_resource(Categories,
-                     '/categories'
-                     )
-    api.add_resource(CategoryQuestions,
-                     '/categories/<int:category_id>/questions'
-                     )
-    api.add_resource(Questions,
-                     '/',
-                     '/questions',
-                     '/questions/<int:questions_id>'
-                     )
-    api.add_resource(PlayQuiz,
-                     '/quizzes',  # POST
-                     '/quizzes/categories'  # GET
-                     )
+            # success_response['showAnswer'] = False
+            success_response['previousQuestions'] = previous_questions
+            success_response['question'] = {
+                'question': new_question.question,
+                'answer': new_question.answer,
+                # 'category': new_question.category,
+                # 'difficulty': new_question.difficulty
+                'forceEnd': False if questions_not_played_yet else True
+            }
+            # success_response['guess'] = ''
+            success_response['forceEnd'] = False if questions_not_played_yet else True
 
+            return success_response, 200
 
+            # except:
+            #     return fail_response, 400
+
+    api.add_resource(Categories, '/categories')
+    api.add_resource(CategoryQuestions, '/categories/<int:category_id>/questions')
+    api.add_resource(Questions, '/', '/questions', '/questions/<int:questions_id>')
+    api.add_resource(PlayQuiz, '/quizzes')
 
     '''
   @TODO: 
