@@ -15,16 +15,17 @@ class TriviaTestCase(unittest.TestCase):
 
     def create_data_in_database(self):
         """Create objects/rows in category and questions tables"""
-        self.category_art = Category(type='Art').insert()
+        category_art = Category(type='Art').insert()
+        category_tech = Category(type='Technology').insert()
+        category_science = Category(type='Science').insert()
         self.category_science = Category(type='Science').insert()
-        self.category_technology = Category(type='Technology').insert()
 
         # Create test questions
-        Question(question='test question 1', answer='test answer 1', category=self.category_art, difficulty=3).insert()
-        Question(question='test question 2', answer='test answer 2', category=self.category_science, difficulty=2).insert()
-        Question(question='test question 3', answer='test answer 3', category=self.category_technology, difficulty=3).insert()
-        Question(question='test question 4', answer='test answer 4', category=self.category_technology, difficulty=2).insert()
-        Question(question='test question 5', answer='test answer 5', category=self.category_art, difficulty=3).insert()
+        Question(question='test question 1', answer='test answer 1', category=category_art, difficulty=3).insert()
+        Question(question='test question 2', answer='test answer 2', category=category_science, difficulty=2).insert()
+        Question(question='test question 3', answer='test answer 3', category=category_tech, difficulty=3).insert()
+        Question(question='test question 4', answer='test answer 4', category=category_tech, difficulty=2).insert()
+        Question(question='test question 5', answer='test answer 5', category=category_art, difficulty=3).insert()
 
     def setUp(self):
         """Define test variables and initialize app."""
@@ -66,6 +67,7 @@ class TriviaTestCase(unittest.TestCase):
 
     def test_204_delete_a_question(self):
         """Create a test question in db and delete the same question"""
+
         Question(
             question='What color is the sky!?',
             answer='Blue',
@@ -154,7 +156,7 @@ class TriviaTestCase(unittest.TestCase):
     # def test_200_questions_based_on_category(self):
     #     q = Question.query.all()
 
-        # resp = self.client().get(f'/categories/{self.category_art.id}/questions')
+    # resp = self.client().get(f'/categories/{self.category_art.id}/questions')
 
     def test_200_get_questions_to_play_the_quiz(self):
         """  TEST: In the "Play" tab, after a user selects "All" or a category, one question
