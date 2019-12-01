@@ -122,6 +122,23 @@ def create_app(test_config=None):
             if not post_data:
                 fail_response['message'] = 'None or invalid question format sent to server.'
                 return fail_response, 400
+
+            if search_term := post_data.get('searchTerm', None):
+                print_red(search_term)
+                # self.get(search_term=search_term)
+                questions = Question.query.order_by(Question.id) \
+                    .filter(Question.question.ilike(f'%{search_term}%')).all()
+                categories = Category.query.all()
+                print_blue(questions)
+                print_blue(categories)
+                success_response['questions'] = paginate(request, questions)
+                success_response['total_questions'] = len(questions)
+                success_response['categories'] = {category.id: category.type for category in categories}
+                success_response['current_category'] = None
+                return success_response, 200
+
+
+
             elif not all(
                     [post_data.get('question', None),
                      post_data.get('answer', None),
