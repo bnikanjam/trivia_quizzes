@@ -5,7 +5,7 @@ from flask_cors import CORS
 from flask_restful import Api, Resource, reqparse
 import random
 
-from sqlalchemy import exc
+from sqlalchemy import exc, desc
 
 from models import setup_db, Question, Category
 
@@ -89,7 +89,7 @@ def create_app(test_config=None):
                 'message': 'The server can not find questions or no question exists yet.'
             }
             try:
-                questions = Question.query.all()
+                questions = Question.query.order_by(Question.id).all()
                 categories = Category.query.all()
 
                 if not questions or not categories:
@@ -124,20 +124,18 @@ def create_app(test_config=None):
                 return fail_response, 400
 
             if search_term := post_data.get('searchTerm', None):
-                print_red(search_term)
-                # self.get(search_term=search_term)
                 questions = Question.query.order_by(Question.id) \
                     .filter(Question.question.ilike(f'%{search_term}%')).all()
-                categories = Category.query.all()
-                print_blue(questions)
-                print_blue(categories)
+
+                categories_ids = {question.category for question in questions}
+                categories = Category.query.filter(Category.id.in_(categories_ids)).all()
+                current_category = random.choice(list(categories_ids)) if categories_ids else None
+
                 success_response['questions'] = paginate(request, questions)
                 success_response['total_questions'] = len(questions)
                 success_response['categories'] = {category.id: category.type for category in categories}
-                success_response['current_category'] = None
+                success_response['current_category'] = current_category
                 return success_response, 200
-
-
 
             elif not all(
                     [post_data.get('question', None),
