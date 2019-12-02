@@ -164,7 +164,21 @@ class TriviaTestCase(unittest.TestCase):
         and shown whether they were correct or not."""
 
     def test_400_get_questions_to_play_the_quiz(self):
-        pass
+        headers = {
+            'Content-Type': 'application/json'
+        }
+        frontend_request_body = {
+            "previous_questions": [],
+            "quiz_category": {
+                "type": "click",
+                "id": 0
+            }
+        }
+
+        for cnt in range(5):
+            resp = self.client().post('/quizzes', headers=headers, data=json.dumps(frontend_request_body))
+            self.assertEqual(resp.status_code, 200)
+
 
 
 if __name__ == "__main__":
