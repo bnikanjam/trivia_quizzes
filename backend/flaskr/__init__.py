@@ -1,11 +1,10 @@
 import os
-from flask import Flask, request, abort, jsonify
-from flask_sqlalchemy import SQLAlchemy
-from flask_cors import CORS
-from flask_restful import Api, Resource
 import random
 
-from sqlalchemy import exc, desc
+from flask import Flask, request
+from flask_cors import CORS
+from flask_restful import Api, Resource
+from sqlalchemy import exc
 
 from models import setup_db, Question, Category
 
@@ -18,8 +17,6 @@ def paginate(request, selection):
     page = request.args.get('page', 1, int)
     start = (page - 1) * QUESTIONS_PER_PAGE
     end = start + QUESTIONS_PER_PAGE
-    # questions = [question.format() for question in selection]
-    # return questions[start:end]
     return [question.format() for question in selection[start:end]]
 
 
@@ -29,13 +26,11 @@ def create_app(test_config=None):
 
     # Initializes Cross Origin Resource sharing for the app
     CORS(app)
-
     # Set Access-Control-Allow
     @app.after_request
     def after_request(response):
         response.headers.add('Access-Control-Allow-Headers', 'Content-Type,Authorization,true')
         response.headers.add('Access-Control-Allow-Methods', 'GET,PUT,POST,DELETE,OPTIONS')
-        # response.headers.add('Access-Control-Allow-Origin', '*')
         return response
 
     if not test_config:
@@ -214,67 +209,56 @@ def create_app(test_config=None):
                 return fail_response, 404
 
     class PlayQuiz(Resource):
-        """"""
-
         def post(self):
-            """Returns response object with questions to play the quiz.
-            This endpoint takes category and previous question parameters and
+            """ HTTP POST -> CRUD READ
+            Returns response object with questions to play the quiz game.
+            This endpoint takes category and previous questions played and
             return a random questions within the given category, if provided,
-            and that is not one of the previous questions. """
+            and that is not played yet."""
+
             success_response = {
                 'status': 'success',
-                # 'showAnswer': False,
                 'previousQuestions': [],
-                # 'guess': '',
                 'forceEnd': False
             }
             fail_response = {
                 'status': 'fail',
-                'message': 'ERROR'
+                'message': 'Error. Server did not retrieve an un played quiz question.'
             }
 
-            # # try:
-            post_data = request.get_json(silent=True)
-            print_blue(post_data)
-            previous_questions = post_data.get('previous_questions')
-            quiz_category = post_data.get('quiz_category')
+            try:
+                frontend_request_data = request.get_json(silent=True)
+                previous_questions = frontend_request_data.get('previous_questions')
+                quiz_category = frontend_request_data.get('quiz_category')
 
-            play_all_categories = True if not quiz_category['id'] else False
-            if play_all_categories:
-                questions_not_played_yet = Question.query.filter(~Question.id.in_(previous_questions)).all()
-                new_question = random.choice(questions_not_played_yet)
-                print_yellow(new_question)
-                previous_questions.append(new_question.id)
-            else:
-                # TODO Category
-                pass
+                play_all_categories = True if not quiz_category['id'] else False
+                if play_all_categories:
+                    questions_not_played_yet = Question.query \
+                        .filter(~Question.id.in_(previous_questions)).all()
+                    new_question = random.choice(questions_not_played_yet)
+                    previous_questions.append(new_question.id)
+                else:
+                    questions_not_played_yet = Question.query \
+                        .filter(Question.category == str(quiz_category['id'])) \
+                        .filter(~Question.id.in_(previous_questions)).all()
+                    new_question = random.choice(questions_not_played_yet)
+                    previous_questions.append(new_question.id)
 
-            # success_response['showAnswer'] = False
-            success_response['previousQuestions'] = previous_questions
-            success_response['question'] = {
-                'question': new_question.question,
-                'answer': new_question.answer,
-                # 'category': new_question.category,
-                # 'difficulty': new_question.difficulty
-                'forceEnd': False if questions_not_played_yet else True
-            }
-            # success_response['guess'] = ''
-            success_response['forceEnd'] = False if questions_not_played_yet else True
+                    success_response['previousQuestions'] = previous_questions
+                    success_response['question'] = {
+                        'question': new_question.question,
+                        'answer': new_question.answer,
+                    }
+                success_response['forceEnd'] = False if questions_not_played_yet else True
+                return success_response, 200
+            except:
+                return fail_response, 400
 
-            return success_response, 200
-
-            # except:
-            #     return fail_response, 400
+            # TODO Create error handlers for all expected errors  including 404 and 422.
 
     api.add_resource(Categories, '/categories')
     api.add_resource(CategoryQuestions, '/categories/<int:category_id>/questions')
     api.add_resource(Questions, '/', '/questions', '/questions/<int:questions_id>')
     api.add_resource(PlayQuiz, '/quizzes')
-
-    '''
-  @TODO: 
-  Create error handlers for all expected errors 
-  including 404 and 422. 
-  '''
 
     return app
