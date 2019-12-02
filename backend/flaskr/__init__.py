@@ -230,10 +230,10 @@ def create_app(test_config=None):
                 frontend_request_data = request.get_json(silent=True)
                 previous_questions = frontend_request_data.get('previous_questions')
                 quiz_category = frontend_request_data.get('quiz_category')
-
                 play_all_categories = True if not quiz_category['id'] else False
+
                 if play_all_categories:
-                    questions_not_played_yet = Question.query \
+                    questions_not_played_yet = Question.query\
                         .filter(~Question.id.in_(previous_questions)).all()
                     new_question = random.choice(questions_not_played_yet)
                     previous_questions.append(new_question.id)
@@ -244,11 +244,11 @@ def create_app(test_config=None):
                     new_question = random.choice(questions_not_played_yet)
                     previous_questions.append(new_question.id)
 
-                    success_response['previousQuestions'] = previous_questions
-                    success_response['question'] = {
-                        'question': new_question.question,
-                        'answer': new_question.answer,
-                    }
+                success_response['previousQuestions'] = previous_questions
+                success_response['question'] = {
+                    'question': new_question.question,
+                    'answer': new_question.answer,
+                }
                 success_response['forceEnd'] = False if questions_not_played_yet else True
                 return success_response, 200
             except:
