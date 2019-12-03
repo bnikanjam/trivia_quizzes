@@ -144,41 +144,42 @@ class TriviaTestCase(unittest.TestCase):
         # response code
         self.assertEqual(resp.status_code, 400)
 
-    def test_200_search_questions_returned_results(self):
-        headers = {
-            'Content-Type': 'application/json'
-        }
-        resp = self.client().post('/questions',
-                                  headers=headers,
-                                  data=json.dumps({'searchTerm': 'test q'}))
+    # Search Tests:
+    def test_200_search_questions_returns_5_results(self):
+
+        resp = self.client().post('/questions', json={'searchTerm': 'test ques'})
         self.assertEqual(resp.status_code, 200)
+        self.assertTrue(resp.json['questions'])
+        self.assertEquals(len(resp.json['questions']), 5)
 
-    # def test_200_questions_based_on_category(self):
-    #     q = Question.query.all()
+    def test_200_search_questions_returns_1_result(self):
+        resp = self.client().post('/questions', json={'searchTerm': 'question 5'})
+        self.assertEqual(resp.status_code, 200)
+        self.assertTrue(resp.json['questions'])
+        self.assertEquals(len(resp.json['questions']), 1)
 
-    # resp = self.client().get(f'/categories/{self.category_art.id}/questions')
+    def test_200_search_questions_returns_0_results(self):
+        resp = self.client().post('/questions', json={'searchTerm': 'question 50000000'})
+        self.assertEqual(resp.status_code, 200)
+        self.assertFalse(resp.json['questions'])
+        self.assertEquals(len(resp.json['questions']), 0)
 
+    # Playing Game e.g. Taking Quiz Test
     def test_200_get_questions_to_play_the_quiz(self):
         """  TEST: In the "Play" tab, after a user selects "All" or a category, one question
         at a time is displayed, the user is allowed to answer
         and shown whether they were correct or not."""
-
-    def test_400_get_questions_to_play_the_quiz(self):
-        headers = {
-            'Content-Type': 'application/json'
-        }
-        frontend_request_body = {
+        request_body = {
             "previous_questions": [],
             "quiz_category": {
                 "type": "click",
                 "id": 0
             }
         }
-
-        for cnt in range(5):
-            resp = self.client().post('/quizzes', headers=headers, data=json.dumps(frontend_request_body))
+        for cnt in range(1, 5):
+            resp = self.client().post('/quizzes', json=request_body)
             self.assertEqual(resp.status_code, 200)
-
+            self.assertTrue(resp.json['status'], 'success')
 
 
 if __name__ == "__main__":
