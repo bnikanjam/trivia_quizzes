@@ -14,13 +14,13 @@ class TriviaTestCase(unittest.TestCase):
     """This class represents the trivia test case"""
 
     def create_data_in_database(self):
-        """Create objects/rows in category and questions tables"""
+        """Create 4 test categories"""
         category_art = Category(type='Art').insert()
         category_tech = Category(type='Technology').insert()
         category_science = Category(type='Science').insert()
         self.category_science = Category(type='Science').insert()
 
-        # Create test questions
+        # Create 5 test questions
         Question(question='test question 1', answer='test answer 1', category=category_art, difficulty=3).insert()
         Question(question='test question 2', answer='test answer 2', category=category_science, difficulty=2).insert()
         Question(question='test question 3', answer='test answer 3', category=category_tech, difficulty=3).insert()
@@ -48,6 +48,30 @@ class TriviaTestCase(unittest.TestCase):
         # Delete all rows in both tables.
         Category.query.delete()
         Question.query.delete()
+
+    # GET /categories
+    def test_200_list_of_all_categories(self):
+        resp = self.client().get('/categories')
+        self.assertEqual(resp.status_code, 200)
+        self.assertEqual(resp.json['status'],'success')
+        self.assertTrue(resp.json['categories'])
+        self.assertEquals(len(resp.json['categories']), 4)
+        self.assertTrue('Art' in resp.json['categories'].values())
+        self.assertTrue('Technology' in resp.json['categories'].values())
+        self.assertTrue('Science' in resp.json['categories'].values())
+
+    # GET /categories if db returns no category
+    def test_400_list_of_all_categories(self):
+        Category.query.delete()
+        resp = self.client().get('/categories')
+        self.assertEqual(resp.status_code, 400)
+        self.assertEqual(resp.json['status'], 'fail')
+        self.assertFalse(resp.json['categories'])
+        self.assertEquals(len(resp.json['categories']), 0)
+        self.assertTrue('Art' not in resp.json['categories'].values())
+        self.assertTrue('Technology' not in resp.json['categories'].values())
+        self.assertTrue('Science' not in resp.json['categories'].values())
+
 
     def test_200_get_paginated_questions_list(self, page=1):
         self.create_data_in_database()

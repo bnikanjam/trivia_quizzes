@@ -41,34 +41,35 @@ def create_app(test_config=None):
     api = Api(app)
 
     class Categories(Resource):
-        """"""
         payload_key = 'categories'
 
         def get(self):
-            """HTTP GET """
+            """Return json response: list of all categories
+            HTTP GET -> CRUD READ"""
             success_response = {
                 'status': 'success',
                 self.payload_key: list()
             }
             fail_response = {
                 'status': 'fail',
+                self.payload_key: {},
                 'message': 'The server can not find categories or no category exists yet.'
             }
             try:
                 categories = Category.query.all()
-                if categories is None:
+                if not categories:
                     return fail_response, 400
                 else:
                     success_response[self.payload_key] = {category.id: category.type for category in categories}
                     return success_response, 200
-            except ValueError:
+            except exc.IntegrityError:
                 return fail_response, 404
 
     class Questions(Resource):
-        """"""
 
         def get(self):
-            """HTTP GET Request Method -> CRUD Read"""
+            """Return json response: Paginated list of all questions
+            HTTP GET -> CRUD Read"""
             success_response = {
                 'status': 'success',
                 'questions': [],
@@ -97,7 +98,9 @@ def create_app(test_config=None):
                 return fail_response, 404
 
         def post(self):
-            """HTTP POST Request Method"""
+            """Search questions or add (create) a question
+            If searching questions: return json response of paginated list of found questions. HTTP GET -> CRUD Read
+            If creating a question: return success json response"""
             success_response = {
                 'status': 'success',
                 'question': '',
@@ -128,7 +131,7 @@ def create_app(test_config=None):
                 success_response['categories'] = {category.id: category.type for category in categories}
                 success_response['current_category'] = current_category
                 return success_response, 200
-
+            # If creating a new question, verify all required data is in request payload
             elif not all(
                     [post_data.get('question', None),
                      post_data.get('answer', None),
@@ -137,6 +140,7 @@ def create_app(test_config=None):
             ):
                 fail_response['message'] = 'Required question data fields not sent to server.'
                 return fail_response, 400
+            # Create new question in db
             else:
                 try:
                     question = post_data.get('question'),
@@ -156,10 +160,11 @@ def create_app(test_config=None):
                     return success_response, 201
                 except exc.IntegrityError:
                     new_question.rollback()
-                    return fail_response, 433
+                    return fail_response, 500
 
         def delete(self, questions_id):
-            """HTTP DELETE Request Method -> CRUD DELETE Action, to delete the specified question"""
+            """Delete a specific question
+            HTTP DELETE -> CRUD DELETE"""
             success_response = {
                 'status': 'success',
                 'message': 'Target question successfully deleted.'
@@ -177,12 +182,12 @@ def create_app(test_config=None):
                 return success_response, 204
             except exc.IntegrityError:
                 target_question.rollback()
-                return fail_response, 444
+                return fail_response, 500
 
     class CategoryQuestions(Resource):
 
         def get(self, category_id):
-            """Returns json response with list of questions base on a category.
+            """Return json response with list of questions base on a category.
             HTTP GET -> CRUD READ"""
 
             success_response = {
