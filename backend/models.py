@@ -1,10 +1,6 @@
-import os
-from sqlalchemy import Column, String, Integer, create_engine
 from flask_sqlalchemy import SQLAlchemy
-import json
-from flask import Flask
+from sqlalchemy import Column, Integer, String
 
-# dev_db = os.getenv('HEROKU_DB_URI')
 
 db = SQLAlchemy()
 
@@ -19,7 +15,7 @@ def setup_db(app, db_url):
 
 
 class Question(db.Model):
-    __tablename__ = 'questions'
+    __tablename__ = "questions"
 
     id = Column(Integer, primary_key=True)
     question = Column(String)
@@ -49,16 +45,16 @@ class Question(db.Model):
 
     def format(self):
         return {
-            'id': self.id,
-            'question': self.question,
-            'answer': self.answer,
-            'category': self.category,
-            'difficulty': self.difficulty
+            "id": self.id,
+            "question": self.question,
+            "answer": self.answer,
+            "category": self.category,
+            "difficulty": self.difficulty,
         }
 
 
 class Category(db.Model):
-    __tablename__ = 'categories'
+    __tablename__ = "categories"
 
     id = Column(Integer, primary_key=True)
     type = Column(String)
@@ -78,7 +74,4 @@ class Category(db.Model):
         db.session.commit()
 
     def format(self):
-        return {
-            'id': self.id,
-            'type': self.type
-        }
+        return {"id": self.id, "type": self.type}

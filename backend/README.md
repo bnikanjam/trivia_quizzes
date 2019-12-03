@@ -1,60 +1,82 @@
-# Full Stack Trivia API Backend
+# The Great Bookshelf of Udacity
+
+This project is a virtual bookshelf for Udacity students. Students are able to add their books to the bookshelf, give them a rating, update the rating and search through their book lists. As a part of the Fullstack Nanodegree, it serves as a practice module for lessons from Course 2: API Development and Documentation. By completing this project, students learn and apply their skills structuring and implementing well formatted API endpoints that leverage knowledge of HTTP and API development best practices. 
+
+All backend code follows [PEP8 style guidelines](https://www.python.org/dev/peps/pep-0008/). 
+
+## Student Guidelines
+
+Hello students! You'll use this base in various workspaces throughout the course to build the project incrementally as you expand your skills. At each stage, there will be various 'TODO's marked for you to complete. You'll also notice some TODOs in the frontend section. You should referene those sections for formatting your endpoints and responses, and update the frontend to match the endpoints you choose and the programmed behavior. 
+
+You should feel free to expand on the project in any way you can dream up to extend your skills. For instance, you could add additional book information to each entry or create individual book views including more information about the book, your thoughts or when you completed it. 
 
 ## Getting Started
-- Pipenv Dependencies
-Development database: Provisioned Heroku PostgreSQL 
-Test database: PostgreSQL 12.1 running in a docker container
 
-heroku pg:psql --app YOUR_APP_NAME_HERE < updates.sql
+### Pre-requisites and Local Development 
+Developers using this project should already have Python3, pip and node installed on their local machines.
 
+#### Backend
 
+From the backend folder run `pip install requirements.txt`. All required packages are included in the requirements file. 
 
+To run the application run the following commands: 
+```
+export FLASK_APP=flaskr
+export FLASK_ENV=development
+flask run
 ```
 
+These commands put the application in development and directs our application to use the `__init__.py` file in our flaskr folder. Working in development mode shows an interactive debugger in the console and restarts the server whenever changes are made. If running locally on Windows, look for the commands in the [Flask documentation](http://flask.pocoo.org/docs/1.0/tutorial/factory/).
 
-## Tasks
+The application is run on `http://127.0.0.1:5000/` by default and is a proxy in the frontend configuration. 
 
-One note before you delve into your tasks: for each endpoint you are expected to define the endpoint and response data. The frontend will be a plentiful resource because it is set up to expect certain endpoints and response data formats already. You should feel free to specify endpoints in your own way; if you do so, make sure to update the frontend or you will get some unexpected behavior. 
+#### Frontend
 
-1. Use Flask-CORS to enable cross-domain requests and set response headers. 
-2. Create an endpoint to handle GET requests for questions, including pagination (every 10 questions). This endpoint should return a list of questions, number of total questions, current category, categories. 
-3. Create an endpoint to handle GET requests for all available categories. 
-4. Create an endpoint to DELETE question using a question ID. 
-5. Create an endpoint to POST a new question, which will require the question and answer text, category, and difficulty score. 
-6. Create a POST endpoint to get questions based on category. 
-7. Create a POST endpoint to get questions based on a search term. It should return any questions for whom the search term is a substring of the question. 
-8. Create a POST endpoint to get questions to play the quiz. This endpoint should take category and previous question parameters and return a random questions within the given category, if provided, and that is not one of the previous questions. 
-9. Create error handlers for all expected errors including 400, 404, 422 and 500. 
-
-REVIEW_COMMENT
+From the frontend folder, run the following commands to start the client: 
 ```
-This README is missing documentation of your endpoints. Below is an example for your endpoint to get all categories. Please use it as a reference for creating your documentation and resubmit your code. 
-
-Endpoints
-GET '/categories'
-GET ...
-POST ...
-DELETE ...
-
-GET '/categories'
-- Fetches a dictionary of categories in which the keys are the ids and the value is the corresponding string of the category
-- Request Arguments: None
-- Returns: An object with a single key, categories, that contains a object of id: category_string key:value pairs. 
-{'1' : "Science",
-'2' : "Art",
-'3' : "Geography",
-'4' : "History",
-'5' : "Entertainment",
-'6' : "Sports"}
-
+npm install // only once to install dependencies
+npm start 
 ```
 
+By default, the frontend will run on localhost:3000. 
 
-## Testing
-To run the tests, run
+### Tests
+In order to run tests navigate to the backend folder and run the following commands: 
+
 ```
-dropdb trivia_test
-createdb trivia_test
-psql trivia_test < trivia.psql
+dropdb bookshelf_test
+createdb bookshelf_test
+psql bookshelf_test < books.psql
 python test_flaskr.py
 ```
+
+The first time you run the tests, omit the dropdb command. 
+
+All tests are kept in that file and should be maintained as updates are made to app functionality. 
+
+
+## API Reference
+
+### Getting Started
+- Base URL: At present this app can only be run locally and is not hosted as a base URL. The backend app is hosted at the default, `http://127.0.0.1:5000/`, which is set as a proxy in the frontend configuration. 
+- Authentication: This version of the application does not require authentication or API keys. 
+
+### Error Handling
+- Response codes
+- Messages
+- Error types
+### Endpoints 
+- Organized by resource
+- Include each endpoint
+- Sample request 
+- Arguments including data types
+- Response object including status codes and data types 
+
+## Deployment N/A
+
+## Authors
+Yours truly, Coach Caryn 
+
+## Acknowledgements 
+The awesome team at Udacity and all of the students, soon to be full stack extraordinaires! 
+
