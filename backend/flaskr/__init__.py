@@ -1,7 +1,7 @@
 import os
 import random
 
-from flask import Flask, request
+from flask import Flask, request, jsonify
 from flask_cors import CORS
 from flask_restful import Api, Resource
 from sqlalchemy import exc
@@ -254,11 +254,48 @@ def create_app(test_config=None):
             except:
                 return fail_response, 400
 
-            # TODO Create error handlers for all expected errors  including 404 and 422.
-
     api.add_resource(Categories, '/categories')
     api.add_resource(CategoryQuestions, '/categories/<int:category_id>/questions')
     api.add_resource(Questions, '/', '/questions', '/questions/<int:questions_id>')
     api.add_resource(PlayQuiz, '/quizzes')
+
+    # Error handlers for expected errors including 404 and 422.
+    @app.errorhandler(400)
+    def bad_request(error):
+        error_message = 'The server could not understand the request due to invalid syntax.'
+        return jsonify({
+            'success': False,
+            'error': 400,
+            'message': error_message
+        }), 400
+
+    @app.errorhandler(404)
+    def requested_method_not_found(error):
+        error_message = 'The server can not find requested resource. ' \
+                        'The endpoint may be valid but the resource itself does not exist.'
+        return jsonify({
+            'success': False,
+            'error': 404,
+            'message': error_message
+        }), 404
+
+    @app.errorhandler(405)
+    def method_not_allowed(error):
+        error_message = 'The request method is known by the server but has not been allowed and cannot be used.'
+        return jsonify({
+            'success': False,
+            'error': 405,
+            'message': error_message
+        }), 405
+
+    @app.errorhandler(422)
+    def unprocessable_entity(error):
+        error_message = 'Server understands the content type of the request entity, and the syntax of the ' \
+                        'request entity is correct, but it was unable to process the contained instructions.'
+        return jsonify({
+            'success': False,
+            'error': 422,
+            'message': error_message
+        }), 422
 
     return app
