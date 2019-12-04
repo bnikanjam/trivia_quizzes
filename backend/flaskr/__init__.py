@@ -8,8 +8,6 @@ from sqlalchemy import exc
 
 from models import setup_db, Question, Category
 
-from utilities import print_blue, print_green, print_red, print_yellow
-
 QUESTIONS_PER_PAGE = 10
 
 
