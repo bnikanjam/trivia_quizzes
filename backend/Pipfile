@@ -5,16 +5,16 @@ verify_ssl = true
 
 [dev-packages]
 flake8 = "*"
-black = "*"
-isort = "*"
 pytest = "*"
+isort = "*"
+black = "==19.3b0"
 
 [packages]
-flask = "1.1.1"
-flask-sqlalchemy = "2.4.1"
-flask-cors = "3.0.8"
-psycopg2-binary = "2.8.4"
-flask-restful = "0.3.7"
+flask-restful = "==0.3.7"
+flask-sqlalchemy = "~=2.4"
+flask-cors = "==3.0.8"
+psycopg2-binary = "==2.8.4"
+flask = "~=1.1.1"
 
 [requires]
 python_version = "3.8"
