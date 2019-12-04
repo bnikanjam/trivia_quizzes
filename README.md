@@ -9,21 +9,69 @@ You should already have Python 3.8, Pipenv for managing dependencies and isolate
 - For development, you can use Postgres server installed locally, built in a docker container, or setup and hosted on a PaaS cloud service such as Heroku. You need to have your PostgreSQL server up and running somewhere and its credentials to connect to it. In this project, we use Heroku Postgres during development.
 - For testing using a cloud database as a service is not practical because, for each test, a new connection must be established over the internet, which makes tests very time-consuming. We build a Postgres docker container for our tests.
 
+#### How to get a development env running
+Clone the project repository and navigate to backend directory.
+```
+git clone https://github.com/bnikanjam/trivia_fullstack_api.git
+cd trivia_fullstack_api/backend
+```
+Create a `.env` file to define environment variables we want to pass to our application and paste the following. You need to use your own Postgres database server URI.
+```
+# Flask
+FLASK_APP=flaskr
+FLASK_ENV=development
+
+# Development PostgreSQL URI
+DEV_DB_URI=<Place your own Postgres server URI>
+TEST_DB_URI=postgresql://postgres:postgres@0.0.0.0:5432/trivia_test
+```
+Create the project virtual environment, install packages and spawn a shell with the virtualenv activated.
+```
+pipenv install --skip-lock
+pipenv install --skip-lock --dev
+pipenv shell
+```
+You should be able to see currently-installed dependency graph information.
+```
+pipenv graph
+```
+Verify that the project environment variables are properly loaded.
+```
+env | grep FLASK
+env | grep DB_URI
+```
+
+##### Build a Postgres docker container for testing
+We are pulling the Alpine version (minimal linux container)of Postgres 12.1. You can see docker the simple setup files in `Dockerfile` and `docker-compose.yml`. Start by ensuring that you have Docker and Docker Compose:
+```
+docker -v
+docker-compose -v
+```
+Build the image and fire up the container in detached mode:
+```
+docker-compose build
+docker-compose up -d
+```
+
+
+
+
 #### Backend
 >Core Technologies:
 - **Python 3.8**
 - **PostgreSQL 12.1**
 
 >Environment Management:
-- **Pipenv** Automatically manages virtual environments and packages.
+- **Pipenv**
+Automatically manages virtual environments and packages
 - **Postgres Server**
-- - Installed locally, Built in a docker container, or Setup on a PaaS)
+Installed locally, Built in a docker container, or Setup on a PaaS
 - **Docker**
-
 
 >Packages:
 - **Flask** Extensible and Lightweight WSGI web application framework
-- **psycopg2-binary** Python PostgreSQL database adapter 
+- **psycopg2-binary** The Python PostgreSQL database adapter
+- **SQLAlchemy** The Python SQL toolkit and Object Relational Mapper
 - **Flask-SQLAlchemy** Extension for Flask that adds support for SQLAlchemy
 - **Flask-Cors** Flask extension for handling Cross Origin Resource Sharing
 - **Flask-RESTful** Extension for Flask that adds support for quickly building REST APIs
@@ -50,3 +98,4 @@ Yours truly, Babak Nikanjam
 - Michael Herman @ testdriven.io
 
 ###### Changelog
+- December 2019
