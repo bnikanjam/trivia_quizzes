@@ -5,7 +5,7 @@ This project is a full-stack web app with API's first design. Users can add ques
 ## Getting Started
 
 ### Pre-requisites and Local Development
-You should already have Python 3.8, Pipenv for managing dependencies and isolated virtual environments, and node installed on your local machine. The project is using a PostgreSQL database, and you also need one or two PostgreSQL database servers. 
+You should already have Python 3.8, Docker, Pipenv, and node installed on your local machine. The project is using a PostgreSQL database, and you also need one or two PostgreSQL database servers. 
 - For development, you can use Postgres server installed locally, built in a docker container, or setup and hosted on a PaaS cloud service such as Heroku. You need to have your PostgreSQL server up and running somewhere and its credentials to connect to it. In this project, we use Heroku Postgres during development.
 - For testing using a cloud database as a service is not practical because, for each test, a new connection must be established over the internet, which makes tests very time-consuming. We build a Postgres docker container for our tests.
 
@@ -27,8 +27,8 @@ TEST_DB_URI=postgresql://postgres:postgres@0.0.0.0:5432/trivia_test
 ```
 Create the project virtual environment, install packages and spawn a shell with the virtualenv activated.
 ```
-pipenv install --skip-lock
-pipenv install --skip-lock --dev
+pipenv install
+pipenv install --dev
 pipenv shell
 ```
 You should be able to see currently-installed dependency graph information.
@@ -42,15 +42,27 @@ env | grep DB_URI
 ```
 
 ##### Build a Postgres docker container for testing
-We are pulling the Alpine version (minimal linux container)of Postgres 12.1. You can see docker the simple setup files in `Dockerfile` and `docker-compose.yml`. Start by ensuring that you have Docker and Docker Compose:
+We are pulling the Alpine version (minimal linux container)of Postgres 12.1. You can see docker the simple setup files in `Dockerfile` and `docker-compose.yml`. Start by ensuring that you have logged in `Docker Desktop` and you have Docker and Docker Compose:
 ```
 docker -v
 docker-compose -v
 ```
-Build the image and fire up the container in detached mode:
+Build the image from docker file and fire up the container in detached mode:
 ```
-docker-compose build
+docker build .
 docker-compose up -d
+```
+To ensure our database now is ready to accept connections, view output from the container by:
+```
+docker-compose logs
+```
+If all successful with your current machine time stamp the last line should display:
+```
+test-db_1  | 2019-12-04 19:49:54.756 UTC [1] LOG:  database system is ready to accept connections
+```
+You can also populate the development database with some starting data from `trivia.psql` file. Here is how to do so with a Heroku Postgres database server:
+```
+ heroku pg:psql --app your-heroku-app-name-that-your-db-provisioned-with < trivia.psql
 ```
 
 
