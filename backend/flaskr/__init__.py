@@ -163,10 +163,7 @@ def create_app(test_config=None):
         def delete(self, questions_id):
             """Delete a specific question
             HTTP DELETE -> CRUD DELETE"""
-            success_response = {
-                'status': 'success',
-                'message': 'Target question successfully deleted.'
-            }
+            success_response = {}
             fail_response = {
                 'status': 'fail',
                 'message': 'Error deleting target question.'
@@ -177,7 +174,7 @@ def create_app(test_config=None):
                     fail_response['message'] = 'Target question does not exist or already deleted.'
                     return fail_response, 404
                 target_question.delete()
-                return success_response, 204
+                return None, 204
             except exc.IntegrityError:
                 target_question.rollback()
                 return fail_response, 500
