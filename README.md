@@ -151,9 +151,9 @@ all categories | /categories | GET | READ | - | - | - | 200 | 400 404 | FormView
 questions based on a category | /categories/category_id/questions | GET | READ | -| category_id | | 200 | 400 404 | QuestionView | CategoryQuestions
 previous questions played. new question to play | /quizzes | POST | READ | - | - | YES | 200 | 400 | QuizView | PlayQuiz
 all questions paginated | `/questions` or `/`| GET | READ | page| - | - | 200 | 400 404 | FormView QuestionView | Questions
-Search all questions | `/questions` or `/`| POST | READ | - | - | Yes | 200 | 400  | FormView | Questions
-Add a question | /questions| POST | CREATE | - | - | Yes | 201 | 400 404 | QuestionView
-Delete a question | /questions/questions_id| DELETE | DELETE | - | questions_id| - | 204 | 404 | QuestionView
+Search all questions | `/questions` or `/`| POST | READ | - | - | Yes | 200 | 400  | FormView QuestionView| Questions
+add a question | `/questions` or `/` | POST | CREATE | - | - | Yes | 201 | 400 500 | FormView | Questions
+delete a question | `/questions/questions_id` or `/questions_id`| DELETE | DELETE | - | questions_id| - | 204 | 404 | QuestionView | Questions
 
 
 **GET /categories**
@@ -381,8 +381,38 @@ Sample Success Response:
     "current_category": 5
 }
 ```
+**POST /questions** with null `searchTerm` and new question data in request body
+Sample Request Body with searchTerm:
+```
+{
+    "question": "What is our blue planet called!?",
+    "answer": "Earth",
+    "category": "1",
+    "difficulty": "1"
+}
+```
+Sample Success Response:
+```
+{
+    "status": "success",
+    "question": "What is our blue planet called!?",
+    "answer": "Earth",
+    "category": "1",
+    "difficulty": "1"
+}
+```
 
+**DELETE /questions/question_id**
+Only 204 response code and no success response body when delettion takes place successfuly.
+Sample Fail Response:
+```
+{
+    "status": "fail",
+    "message": "Target question does not exist or already deleted."
+}
+```
 
+---
 
 #### Authors
 Yours truly, Babak Nikanjam
