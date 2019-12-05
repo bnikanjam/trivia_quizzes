@@ -2,10 +2,12 @@
 
 This project is a full-stack web app with API's first design. Users can add questions with categories and difficulty levels, Search questions, See a list of questions based on categories and play quiz games.
 
+![alt text](root_img.png)
+
 ----
 
 ## Technologies Used:
-####DevOps and Testing:
+#### DevOps and Testing:
 - **Docker** Container platform 
 - **Heroku Postgres** Cloud Postgres database server as a service
 - **Pipenv** Automatically manages virtual environments and packages
@@ -413,9 +415,6 @@ Sample Fail Response:
 ```
 
 ---
-
-#### Authors
-Yours truly, Babak Nikanjam
 
 #### Acknowledgements 
 - Jeff Shomali, React Support.
