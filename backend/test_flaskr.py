@@ -6,7 +6,6 @@ from flask_sqlalchemy import SQLAlchemy
 
 from flaskr import create_app
 from models import Category, Question, setup_db
-from utilities import *
 
 
 class TriviaTestCase(unittest.TestCase):
